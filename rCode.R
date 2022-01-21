@@ -4,8 +4,8 @@ df <- read.csv("marketing_campaign.csv",sep = '\t')
 #Data Cleaning Process
 #Remove "Z_CostContact" and "Z_Revenue" that non-informative
 df <- subset(df, select = -c(Z_CostContact, Z_Revenue))
+
 #Feature Engeneering
-#Encode "Education" and "Marital_Status" into numeric forms
 table(df$Marital_Status)
 table(df$Education)
 df["Marital_Status"][df["Marital_Status"] == 'Alone'] <- 'Single'
@@ -26,9 +26,11 @@ df['newest_customer'] = newest_customer
 df['days_engaged'] <- (df['newest_customer'] - df['Dt_Customer'])
 df <- subset(df, select = -c(Dt_Customer, newest_customer))
 
+# Dropping the outliers 
 df <- na.omit(df)
 df <- subset(df, Age<100 & Income<600000)
 
+#Encode "Education" and "Marital_Status" into numeric forms
 df['Education_encode'] <- as.numeric(as.factor(df$Education))
 df['Marital_Status_encode'] <- as.numeric(as.factor(df$Marital_Status))
 df_enc <- subset(df, select=c(Education_encode, Education))
