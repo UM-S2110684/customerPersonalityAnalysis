@@ -41,8 +41,9 @@ ui <- fluidPage(
           selectInput("education", "Education",
                       c("Graduation", "PhD", "Master", "Basic", "2n cycle")
           ),
-          checkboxGroupInput("status", "Marital Status",
-                             c("Single", "Together", "Married", "Divorced", "Widow", "Alone")
+          radioButtons("status", "Marital Status",
+                             c("Single", "Together", "Married", "Divorced", "Widow"),
+                             selected = "Single"
           ),
           sliderInput("income",
                       "Total of yearly household income",
@@ -115,6 +116,7 @@ server <- {
       minincome <- input$income[1]
       maxincome <- input$income[2]
       
+      #Convert education string to int
       if(education=="2n Cycle"){
         education =1;
       }else if(education=="Basic"){
@@ -126,14 +128,26 @@ server <- {
       }else{
         education =5;
       }
+      #Convert status string to int
+      if(status=="Divorced"){
+        status =1;
+      }else if(status=="Married"){
+        status =2;
+      }else if(status=="Single"){
+        status =3;
+      }else if(status=="Together"){
+        status =4;
+      }else{
+        status =5;
+      }
         
       # Apply filters
       m <- df %>%
         filter(
           Age >= minage,
           Age <= maxage,
-          #Education = education,
-          #Marital_Status = status,
+          Education == education,
+          Marital_Status == status,
           Income >= minincome,
           Income <= maxincome,
         )
