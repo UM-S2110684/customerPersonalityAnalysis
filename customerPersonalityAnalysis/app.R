@@ -12,17 +12,17 @@ library(ggvis)
 library(dplyr)
 
 axis_vars <- c(
-  "Amount spent on Wine" = "wine",
-  "Amount spent on Fruit" = "fruit",
-  "Amount spent on Meat" = "meat",
-  "Amount spent on Fish" = "fish",
-  "Amount spent on Sweets" = "sweets",
-  "Amount spent on Gold" = "gold",
-  "Number of purchases made with a discount" = "deals",
-  "Number of purchases made through the company’s website" = "website",
-  "Number of purchases made using a catalogue" = "catalogue",
-  "Number of purchases made directly in stores" = "stores",
-  "Number of visits to company’s website in the last month" = "visits"
+  "Amount spent on Wine" = "MntWines",
+  "Amount spent on Fruit" = "MntFruits",
+  "Amount spent on Meat" = "MntMeatProducts",
+  "Amount spent on Fish" = "MntFishProducts",
+  "Amount spent on Sweets" = "MntSweetProducts",
+  "Amount spent on Gold" = "MntGoldProds",
+  "Number of purchases made with a discount" = "NumDealsPurchases",
+  "Number of purchases made through the company’s website" = "NumWebPurchases",
+  "Number of purchases made using a catalogue" = "NumCatalogPurchases",
+  "Number of purchases made directly in stores" = "NumStorePurchases",
+  "Number of visits to company’s website in the last month" = "NumWebVisitsMonth"
 )
 
 # Define UI for application that draws a histogram
@@ -44,45 +44,18 @@ ui <- fluidPage(
           checkboxGroupInput("status", "Marital Status",
                              c("Single", "Together", "Married", "Divorced", "Widow", "Alone")
           ),
-          #selectInput("spendType", "Amount spent on",
-          #            c("Wine", "Fruit", "Meat", "Fish", "Sweets", "Gold")
-          #),
           sliderInput("income",
                       "Total of yearly household income",
                       1730,666666,c(3000,50000)),
-          #sliderInput("deals",
-          #            "Number of purchases made with a discount",
-          #            0,15,1),
-          #sliderInput("website",
-          #            "Number of purchases made through the company’s website",
-          #            0,27,1),
-          #sliderInput("catalogue",
-          #            "Number of purchases made using a catalogue",
-          #            0,28,1),
-          #sliderInput("stores",
-          #            "Number of purchases made directly in stores",
-          #            0,13,1),
-          #sliderInput("visits",
-          #            "Number of visits to company’s website in the last month",
-          #            0,20,1),
         ),
         wellPanel(
-          selectInput("xvar", "X-axis variable", axis_vars, selected = "wine"),
-          selectInput("yvar", "Y-axis variable", axis_vars, selected = "deals"),
+          selectInput("xvar", "X-axis variable", axis_vars, selected = "MntWines"),
+          selectInput("yvar", "Y-axis variable", axis_vars, selected = "NumDealsPurchases"),
         )
       ),
       column(9,
-             sidebarLayout(
-               sidebarPanel(
-                 sliderInput("bins",
-                             "Number of bins:",
-                             min = 1,
-                             max = 50,
-                             value = 30)
-               ),
-               # Show a plot of the generated distribution
-               ggvisOutput("plot1"),
-             )
+          # Show a plot of the generated distribution
+          ggvisOutput("plot1"),
       )
     ),
 )
@@ -204,13 +177,13 @@ server <- {
         ggvis(x = xvar, y = yvar) %>%
         layer_points(size := 50, size.hover := 200,
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
-                     stroke = ~has_oscar, key := ~ID) %>%
+                     key := ~ID) %>%
         add_tooltip(movie_tooltip, "hover") %>%
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
-        add_legend("stroke", title = "Unknown", values = c("Yes", "No")) %>%
-        scale_nominal("stroke", domain = c("Yes", "No"),
-                      range = c("orange", "#aaa")) %>%
+        #add_legend("stroke", title = "Unknown", values = c("Yes", "No")) %>%
+        #scale_nominal("stroke", domain = c("Yes", "No"),
+                      #range = c("orange", "#aaa")) %>%
         set_options(width = 500, height = 500)
     })
     vis %>% bind_shiny("plot1")
