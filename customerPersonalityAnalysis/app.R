@@ -81,7 +81,7 @@ server <- {
   #Remove "Z_CostContact" and "Z_Revenue" that non-informative
   df <- subset(df, select = -c(Z_CostContact, Z_Revenue))
   
-  #Feature Engeneering
+  #Feature Engineering
   table(df$Marital_Status)
   table(df$Education)
   df["Marital_Status"][df["Marital_Status"] == 'Alone'] <- 'Single'
