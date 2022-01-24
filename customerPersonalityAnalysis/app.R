@@ -11,6 +11,7 @@ library(shiny)
 library(ggvis)
 library(dplyr)
 
+#Global variable for x and y
 axis_vars <- c(
   "Amount spent on Wine" = "MntWines",
   "Amount spent on Fruit" = "MntFruits",
@@ -61,11 +62,16 @@ ui <- fluidPage(
       column(9,
           # Show a plot of the generated distribution
           ggvisOutput("plot1"),
+          wellPanel(
+            span("Number of cusotmer selected:",
+                 textOutput("n_customer")
+            )
+          )
       )
     ),
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to plot graph
 server <- {
   #Read data set
   df <- read.csv("marketing_campaign.csv",sep = '\t')
@@ -81,6 +87,7 @@ server <- {
   df["Marital_Status"][df["Marital_Status"] == 'YOLO'] <- 'Single'
   df["Marital_Status"][df["Marital_Status"] == 'Absurd'] <- 'Single'
   
+  #Exploratory Data Analysis
   #Calculate the age instead of 'Year-Birth'
   df['Year_Birth']= 2022-df['Year_Birth']
   names(df)[names(df)=="Year_Birth"] <- "Age"
@@ -151,57 +158,49 @@ server <- {
       # Apply filters
       m <- df %>%
         filter(
+          #Range of Age
           Age >= minage,
           Age <= maxage,
+          #Only 1 education type
           Education == education,
+          #Only 1 status selected
           Marital_Status == status,
+          #Range of Income
           Income >= minincome,
           Income <= maxincome,
+          #Range of customer days engaged with company
           days_engaged >= mindays_engaged,
           days_engaged <= maxdays_engaged,
         )
       m <- as.data.frame(m)
     })
     
-    # Function for generating tooltip text
-    cpba_tooltip <- function(x) {
-      if (is.null(x)) return(NULL)
-      if (is.null(x$ID)) return(NULL)
-      
-      # Pick out the movie with this ID
-      df <- isolate(cpbas())
-      cpba <- df[df$ID == x$ID, ]
-      
-      paste0("<b>", cpba$Title, "</b><br>",
-             cpba$Year, "<br>",
-             "$", format(cpba$BoxOffice, big.mark = ",", scientific = FALSE)
-      )
-    }
     # A reactive expression with the ggvis plot
     vis <- reactive({
       # Lables for axes
       xvar_name <- names(axis_vars)[axis_vars == input$xvar]
       yvar_name <- names(axis_vars)[axis_vars == input$yvar]
       
-      # Normally we could do something like props(x = ~BoxOffice, y = ~Reviews),
-      # but since the inputs are strings, we need to do a little more work.
+      # Since the inputs are strings
       xvar <- prop("x", as.symbol(input$xvar))
       yvar <- prop("y", as.symbol(input$yvar))
       
+      #Generate plotting
       cpbas %>%
         ggvis(x = xvar, y = yvar) %>%
+        #Style the plot
         layer_points(size := 50, size.hover := 200,
+                     stroke:="purple",fill:= "purple",
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
-        add_tooltip(cpba_tooltip, "hover") %>%
+        layer_model_predictions(model = "lm")%>%
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
-        #add_legend("stroke", title = "Unknown", values = c("Yes", "No")) %>%
-        #scale_nominal("stroke", domain = c("Yes", "No"),
-                      #range = c("orange", "#aaa")) %>%
         set_options(width = 500, height = 500)
     })
     vis %>% bind_shiny("plot1")
+    #Show the number of customer took part in plot
+    output$n_customer <- renderText({ nrow(cpbas()) })
   }
 }
 # Run the application 
