@@ -196,7 +196,8 @@ server <- {
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
 
-        layer_model_predictions(model = "lm",se=TRUE)%>%
+        layer_model_predictions(model="lm")%>%
+        
         add_tooltip(movie_tooltip, "hover") %>%
 
         add_axis("x", title = xvar_name) %>%
