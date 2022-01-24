@@ -34,7 +34,7 @@ ui <- fluidPage(
     fluidRow(
       column(3,
         wellPanel(
-          h4("Filter"),
+          h4("Choose the following filter to apply to your graph: "),
           sliderInput("age",
                       "Customer's Age",
                       26,82,c(30,50)),
@@ -50,6 +50,7 @@ ui <- fluidPage(
                       1730,666666,c(3000,50000)),
         ),
         wellPanel(
+          h4("Choose x-axis and y-axis variable for your graph to be plotted:"),
           selectInput("xvar", "X-axis variable", axis_vars, selected = "MntWines"),
           selectInput("yvar", "Y-axis variable", axis_vars, selected = "NumDealsPurchases"),
         )
@@ -190,8 +191,10 @@ server <- {
       movies %>%
         ggvis(x = xvar, y = yvar) %>%
         layer_points(size := 50, size.hover := 200,
+                     stroke:="purple",fill:= "purple",
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
+        layer_model_predictions(model = "lm",se=TRUE)%>%
         add_tooltip(movie_tooltip, "hover") %>%
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
