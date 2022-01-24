@@ -36,26 +36,46 @@ ui <- fluidPage(
     fluidRow(
       column(3,
         wellPanel(
-          h4("Choose the following filter to apply to your graph: "),
+          h5("This app will allow you to choose your targeted group of customers and display a scatter plot according to your chosen x-axis and y-axis variables.\n\n"),
+        ),
+        wellPanel(
+          h4(strong("Choose the following filter to be applied to your graph: ")),
+          h5("Use the following slider to adjust the range of age of your targeted customer."),
+          h5("Left- Minimum"),
+          h5("Right- Maximum"),
+            
           sliderInput("age",
                       "Customer's Age",
                       26,82,c(30,50)),
+          h6("--------------------------------------"),
+          h5("Select the level of education for your targeted customer"),
           selectInput("education", "Education",
                       c("Graduation", "PhD", "Master", "Basic", "2n cycle")
           ),
+          h6("--------------------------------------"),
+          h5("Select the marital status of your targeted customer."),
+          h5("You can only choose one at a time."),
+
           radioButtons("status", "Marital Status",
                              c("Single", "Together", "Married", "Divorced", "Widow"),
                              selected = "Single"
           ),
+          h6("--------------------------------------"),
+          h5("Use the following slider to adjust range of yearly household income of your targeted customer."),
+          h5("Left- Minimum, Right- Maximum"),
           sliderInput("income",
                       "Total of yearly household income",
                       1730,162397,c(3000,50000)),
+          h6("--------------------------------------"),
+          h5("Use the following slider to adjust range of days customer engaged with company"),
+          h5("Left- Minimum"),
+          h5("Right- Maximum"),
           sliderInput("days_engaged",
                       "The number of days customer engaged",
                       0,699,c(100,400)),
         ),
         wellPanel(
-          h4("Choose x-axis and y-axis variable for your graph to be plotted:"),
+          h4(strong("Choose x-axis and y-axis variable for your graph:")),
           selectInput("xvar", "X-axis variable", axis_vars, selected = "MntWines"),
           selectInput("yvar", "Y-axis variable", axis_vars, selected = "NumDealsPurchases"),
         )
@@ -64,6 +84,7 @@ ui <- fluidPage(
           # Show a plot of the generated distribution
           ggvisOutput("plot1"),
           wellPanel(
+            h5("Showing the number of customers who satisfy the filters applied: "),
             span("Number of customer selected:",
                  textOutput("n_customer")
             )
@@ -190,15 +211,15 @@ server <- {
       cpbas %>%
         ggvis(x = xvar, y = yvar) %>%
         #Style the plot
-        layer_points(size := 50, size.hover := 200,
+        layer_points(size := 80, size.hover := 200,
                      stroke:="purple",fill:= "purple",
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
         layer_model_predictions(model="lm", se=TRUE)%>%
 
-        add_axis("x", title = xvar_name) %>%
-        add_axis("y", title = yvar_name) %>%
-        set_options(width = 500, height = 500)
+        add_axis("x", title = xvar_name,title_offset = 50) %>%
+        add_axis("y", title = yvar_name,title_offset = 50) %>%
+        set_options(width = 800, height = 800)
     })
     vis %>% bind_shiny("plot1")
     #Show the number of customer took part in plot
