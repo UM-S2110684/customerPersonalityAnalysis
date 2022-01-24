@@ -64,7 +64,7 @@ ui <- fluidPage(
           # Show a plot of the generated distribution
           ggvisOutput("plot1"),
           wellPanel(
-            span("Number of cusotmer selected:",
+            span("Number of customer selected:",
                  textOutput("n_customer")
             )
           )
@@ -194,8 +194,8 @@ server <- {
                      stroke:="purple",fill:= "purple",
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
-        layer_model_predictions(model="lm")%>%
-        add_tooltip(movie_tooltip, "hover") %>%
+        layer_model_predictions(model="lm", se=TRUE)%>%
+
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
         set_options(width = 500, height = 500)
