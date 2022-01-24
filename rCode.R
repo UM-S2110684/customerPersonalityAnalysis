@@ -24,6 +24,7 @@ df$Dt_Customer <- as.Date(df$Dt_Customer, format="%d-%m-%Y")
 newest_customer <- max(df$Dt_Customer)
 df['newest_customer'] = newest_customer
 df['days_engaged'] <- (df['newest_customer'] - df['Dt_Customer'])
+df$days_engaged <- as.numeric(df$days_engaged)
 df <- subset(df, select = -c(Dt_Customer, newest_customer))
 
 # Dropping the outliers 
@@ -38,15 +39,3 @@ df_enc1 <- subset(df, select=c(Marital_Status_encode, Marital_Status))
 df <- subset(df, select = -c(Education, Marital_Status))
 names(df)[names(df)=="Marital_Status_encode"] <- "Marital_Status"
 names(df)[names(df)=="Education_encode"] <- "Education"
-
-if(education=="2n Cycle"){
-  education =1;
-}else if(education=="Basic"){
-  education =2;
-}else if(education=="Graduation"){
-  education =3;
-}else if(education=="Master"){
-  education =4;
-}else{
-  education =5;
-}
