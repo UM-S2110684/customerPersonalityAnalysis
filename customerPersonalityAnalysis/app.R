@@ -22,14 +22,15 @@ axis_vars <- c(
   "Number of purchases made through the company’s website" = "NumWebPurchases",
   "Number of purchases made using a catalogue" = "NumCatalogPurchases",
   "Number of purchases made directly in stores" = "NumStorePurchases",
-  "Number of visits to company’s website in the last month" = "NumWebVisitsMonth"
+  "Number of visits to company’s website in the last month" = "NumWebVisitsMonth",
+  "Total spent on Goods" = "Total_Spent"
 )
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Customer Personality Analysis"),
+    titlePanel("Customer Purchase Behavoir Analysis"),
     
     fluidRow(
       column(3,
@@ -47,7 +48,10 @@ ui <- fluidPage(
           ),
           sliderInput("income",
                       "Total of yearly household income",
-                      1730,666666,c(3000,50000)),
+                      1730,162397,c(3000,50000)),
+          sliderInput("days_engaged",
+                      "The number of days customer engaged",
+                      0,699,c(100,400)),
         ),
         wellPanel(
           selectInput("xvar", "X-axis variable", axis_vars, selected = "MntWines"),
@@ -77,14 +81,15 @@ server <- {
   df["Marital_Status"][df["Marital_Status"] == 'YOLO'] <- 'Single'
   df["Marital_Status"][df["Marital_Status"] == 'Absurd'] <- 'Single'
   
-  # calculate the age instead of 'Year-Birth'
+  #Calculate the age instead of 'Year-Birth'
   df['Year_Birth']= 2022-df['Year_Birth']
   names(df)[names(df)=="Year_Birth"] <- "Age"
+  
   #Total spending on all items
   df['Total_Spent'] = df["MntWines"]+ df["MntFruits"]+ df["MntMeatProducts"]
   + df["MntFishProducts"]+ df["MntSweetProducts"]+ df["MntGoldProds"]
   
-  # creating a new feature indicates the number of days customer engaged to the company
+  #Creating a new feature indicates the number of days customer engaged to the company
   df$Dt_Customer <- as.Date(df$Dt_Customer, format="%d-%m-%Y")
   newest_customer <- max(df$Dt_Customer)
   df['newest_customer'] = newest_customer
@@ -107,7 +112,7 @@ server <- {
   
   function(input, output) {
     # Filter the movies, returning a data frame
-    movies <- reactive({
+    cpbas <- reactive({
       # Due to dplyr issue #318, we need temp variables for input values
       minage <- input$age[1]
       maxage <- input$age[2]
@@ -115,6 +120,8 @@ server <- {
       status <- input$status
       minincome <- input$income[1]
       maxincome <- input$income[2]
+      mindays_engaged <- input$days_engaged[1]
+      maxdays_engaged <- input$days_engaged[2]
       
       #Convert education string to int
       if(education=="2n Cycle"){
@@ -150,30 +157,24 @@ server <- {
           Marital_Status == status,
           Income >= minincome,
           Income <= maxincome,
+          days_engaged >= mindays_engaged,
+          days_engaged <= maxdays_engaged,
         )
-      
       m <- as.data.frame(m)
-      
-      # Add column which says whether the movie won any Oscars
-      # Be a little careful in case we have a zero-row data frame
-      #m$has_oscar <- character(nrow(m))
-      #m$has_oscar[m$Oscars == 0] <- "No"
-      #m$has_oscar[m$Oscars >= 1] <- "Yes"
-      m
     })
     
     # Function for generating tooltip text
-    movie_tooltip <- function(x) {
+    cpba_tooltip <- function(x) {
       if (is.null(x)) return(NULL)
       if (is.null(x$ID)) return(NULL)
       
       # Pick out the movie with this ID
-      df <- isolate(movies())
-      movie <- df[df$ID == x$ID, ]
+      df <- isolate(cpbas())
+      cpba <- df[df$ID == x$ID, ]
       
-      paste0("<b>", movie$Title, "</b><br>",
-             movie$Year, "<br>",
-             "$", format(movie$BoxOffice, big.mark = ",", scientific = FALSE)
+      paste0("<b>", cpba$Title, "</b><br>",
+             cpba$Year, "<br>",
+             "$", format(cpba$BoxOffice, big.mark = ",", scientific = FALSE)
       )
     }
     # A reactive expression with the ggvis plot
@@ -187,12 +188,12 @@ server <- {
       xvar <- prop("x", as.symbol(input$xvar))
       yvar <- prop("y", as.symbol(input$yvar))
       
-      movies %>%
+      cpbas %>%
         ggvis(x = xvar, y = yvar) %>%
         layer_points(size := 50, size.hover := 200,
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
-        add_tooltip(movie_tooltip, "hover") %>%
+        add_tooltip(cpba_tooltip, "hover") %>%
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
         #add_legend("stroke", title = "Unknown", values = c("Yes", "No")) %>%
