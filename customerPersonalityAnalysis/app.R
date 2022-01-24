@@ -194,15 +194,8 @@ server <- {
                      stroke:="purple",fill:= "purple",
                      fillOpacity := 0.2, fillOpacity.hover := 0.5,
                      key := ~ID) %>%
-<<<<<<< HEAD
-        layer_model_predictions(model = "lm")%>%
-=======
-
         layer_model_predictions(model="lm")%>%
-        
         add_tooltip(movie_tooltip, "hover") %>%
-
->>>>>>> c7cee7af9c59161fad1a82a59485c95386709d78
         add_axis("x", title = xvar_name) %>%
         add_axis("y", title = yvar_name) %>%
         set_options(width = 500, height = 500)
