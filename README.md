@@ -7,4 +7,4 @@ This project is simple customer buying behaviour analysis.
 To run this project, download it and run using any applications for R Programming.
 
 # link for R presentation
-https://rpubs.com/JinXue/858227
+https://rpubs.com/JinXue/858556
